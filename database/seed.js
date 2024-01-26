@@ -1,11 +1,8 @@
 const { Namespace, Room } = require('./models')
 const mongoose = require('mongoose')
-require('dotenv').config()
 
 mongoose
-    .connect(
-        `mongodb+srv://mayccos:Pompounet-89@cluster-projet-14.nxgcf.mongodb.net/mayccoschat`,
-    )
+    .connect('VOTRE DB')
     .then(() => {
         console.log('connexion ok !')
 

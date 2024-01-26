@@ -38,7 +38,6 @@ exports.decodeJwtToken = decodeJwtToken
 
 const extractUserFromToken = async (req, res, next) => {
     const token = req.cookies.jwt
-
     if (token) {
         try {
             let decodedToken = jwt.verify(token, secret, {

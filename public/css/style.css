@@ -16,9 +16,6 @@ a:hover {
     color: #dcddde;
     text-decoration: none;
 }
-#logout {
-    cursor: pointer;
-}
 
 body {
     background: #36393f;
@@ -77,6 +74,10 @@ body {
 .list-messages {
     overflow-y: auto;
     max-height: calc(100vh - 160px);
+}
+
+#logout {
+    cursor: pointer;
 }
 
 /* width */
