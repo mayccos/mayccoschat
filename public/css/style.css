@@ -16,6 +16,9 @@ a:hover {
     color: #dcddde;
     text-decoration: none;
 }
+#logout {
+    cursor: pointer;
+}
 
 body {
     background: #36393f;

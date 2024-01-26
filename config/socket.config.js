@@ -45,6 +45,11 @@ const initNamespaces = async () => {
                         throw e
                     }
                 })
+                // Nous ajoutons simplement ce gestionnaire d’événement :
+                nsSocket.on('leaveRoom', (roomId) => {
+                    nsSocket.leave(`/${roomId}`)
+                })
+
                 // Lorsqu’une socket d’un namespace envoi l’événement message :
                 nsSocket.on('message', async ({ text, roomId }) => {
                     try {

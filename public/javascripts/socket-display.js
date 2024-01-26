@@ -3,13 +3,27 @@
 function createNamespaceItem(namespace, isActive) {
     const li = document.createElement('li')
     li.classList.add('item-namespace', 'p-2', 'm-2')
-    // Nous ajoutons la classe active si le namespace est actif :
     if (isActive) {
         li.classList.add('active')
     }
     li.innerHTML = `
       <img src="${namespace.imgUrl}" />
     `
+    li.addEventListener('click', () => {
+        if (activeNsSocket.nsp !== `/${namespace._id}`) {
+            // Lorsque nous quittons le namespace, nous commençons par demander au
+            // serveur de nous faire quitter la room actuelle :
+            activeNsSocket.emit('leaveRoom', activeRoom._id)
+            // Puis nous récupérons la bonne socket correspondant à l’id du namespace
+            // sélectionné par l’utilisateur :
+            const ns = namespaceSockets.find(
+                (ns) => ns.nsp === `/${namespace._id}`,
+            )
+            // Pour nous l’activons et nous réaffichons les namespaces :
+            activateNamespace(ns)
+            displayNamespaces(namespaces, ns.nsp)
+        }
+    })
     return li
 }
 
@@ -35,12 +49,31 @@ function createRoomItem(room, isActive) {
     const li = document.createElement('li')
     li.classList.add('item-room', 'p-2', 'm-2')
     // Nous ajoutons la classe active si la room est active
+
     if (isActive) {
         li.classList.add('active')
     }
     li.innerHTML = `
       # ${room.title}
     `
+    // Lorsque nous cliquons sur une room :
+    li.addEventListener('click', () => {
+        // et que la room n’est pas déjà active
+        if (activeRoom._id !== room._id) {
+            // Alors nous émettons l’événement pour demander au serveur de quitter
+            // la room active jusqu’à maintenant :
+            activeNsSocket.emit('leaveRoom', activeRoom._id)
+            // Et de nous connecter à la nouvelle room :
+            activateRoom(room)
+            // Et nous réaffichons les rooms :
+            displayRooms(
+                rooms.filter(
+                    (room) => `/${room.namespace}` === activeNsSocket.nsp,
+                ),
+                room._id,
+            )
+        }
+    })
     return li
 }
 
