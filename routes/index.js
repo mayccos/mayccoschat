@@ -6,8 +6,8 @@ const { ensureAuthenticated } = require('../config/security.config')
 router.use('/users', userRoutes)
 router.use('/auth', authRoutes)
 
-router.get('/', (req, res) => {
-    ensureAuthenticated()
+router.get('/', ensureAuthenticated, (req, res) => {
+    req.isAuthenticated()
         ? res.render('index', { user: req.user })
         : res.redirect('/auth/signin/form')
 })

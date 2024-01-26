@@ -3,6 +3,10 @@ const { server } = require('../app')
 const { ensureAuthenticatedOnSocketHandshake } = require('./security.config')
 const { getNamespaces } = require('../queries/namespace.queries')
 const { findRoomPerNamespaceId } = require('../queries/room.queries')
+const {
+    createMessage,
+    findMessagesPerRoomId,
+} = require('../queries/messages.queries')
 let ios
 let namespaces
 
@@ -28,6 +32,40 @@ const initNamespaces = async () => {
                 } catch (e) {
                     throw e
                 }
+                // La socket d’un namespace demande à rejoindre une room en donnant son id :
+                nsSocket.on('joinRoom', async (roomId) => {
+                    try {
+                        // Nous lui faisons rejoindre :
+                        nsSocket.join(`/${roomId}`)
+                        // Nous récupérons tous les messages de la room
+                        const messages = await findMessagesPerRoomId(roomId)
+                        // Nous émettons alors l’événement avec tous les messages :
+                        nsSocket.emit('history', messages)
+                    } catch (e) {
+                        throw e
+                    }
+                })
+                // Lorsqu’une socket d’un namespace envoi l’événement message :
+                nsSocket.on('message', async ({ text, roomId }) => {
+                    try {
+                        // Nous récupérons l’id et le nom d’utilisateur depuis la requête initiale
+                        // conservée sur l’objet socket. En effet, lors de la vérification du token
+                        // JWT nous plaçons les informations de l’utilisateur sur req.user
+                        // Nous pouvons donc récupérer ces informations :
+                        const { _id, username } = nsSocket.request.user
+                        // Nous sauvegardons alors le message :
+                        const message = await createMessage({
+                            data: text,
+                            room: roomId,
+                            author: _id,
+                            authorName: username,
+                        })
+                        // Nous émettons alors le message à toutes les sockets de la room :
+                        ns.to(`/${roomId}`).emit('message', message)
+                    } catch (e) {
+                        throw e
+                    }
+                })
             })
         }
     } catch (e) {
